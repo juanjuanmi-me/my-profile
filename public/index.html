@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卷卷卷 - 个人主页</title>
+<style>
+  /* ================= 嫩粉色主题 ================= */
+  :root {
+    --bg: #fff0f5;           
+    --card: #ffffff;         
+    --text: #3f3f46;         
+    --text-muted: #71717a;   
+    --accent: #ec4899;       
+    --accent-light: #fce7f3; 
+    --border-color: #fbcfe8; 
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden; /* 防止背景动画导致滚动条 */
+  }
+  
+  /* ================= 全屏背景漂浮物 ================= */
+  .bg-decorations {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; /* 让鼠标能穿透背景去点击卡片 */
+    z-index: -1;
+    overflow: hidden;
+  }
+  .decor {
+    position: absolute;
+    opacity: 0.6;
+    animation: floatBg 6s ease-in-out infinite alternate;
+  }
+  /* 左侧 */
+  .decor:nth-child(1) { left: 6%; top: 15%; font-size: 40px; animation-delay: 0s; }
+  .decor:nth-child(2) { left: 12%; top: 45%; font-size: 24px; animation-delay: 1.5s; }
+  .decor:nth-child(3) { left: 5%; top: 75%; font-size: 50px; animation-delay: 0.8s; }
+  .decor:nth-child(4) { left: 18%; top: 88%; font-size: 30px; animation-delay: 2.5s; }
+  /* 右侧 */
+  .decor:nth-child(5) { right: 5%; top: 25%; font-size: 45px; animation-delay: 0.5s; }
+  .decor:nth-child(6) { right: 15%; top: 55%; font-size: 30px; animation-delay: 1.8s; }
+  .decor:nth-child(7) { right: 8%; top: 85%; font-size: 55px; animation-delay: 1s; }
+  .decor:nth-child(8) { right: 20%; top: 10%; font-size: 25px; animation-delay: 3s; }
+
+  @keyframes floatBg {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+    100% { transform: translateY(-40px) rotate(25deg); opacity: 0.8; }
+  }
+
+  /* ================= 核心布局 ================= */
+  .container { 
+    max-width: 800px; 
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ================= 顶部个人信息区 ================= */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    animation: fadeInDown 0.8s ease-out forwards;
+  }
+  
+  .profile-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  
+  /* 头像：呼吸光晕 + 微微放大 */
+  .avatar {
+    width: 110px; 
+    height: 140px; 
+    border-radius: 12px; 
+    border: 3px solid #ffffff; 
+    background: var(--accent-light);
+    display: flex; justify-content: center; align-items: center;
+    font-size: 40px; font-weight: bold; color: var(--accent);
+    flex-shrink: 0;
+    object-fit: cover; 
+    animation: breathe 3s ease-in-out infinite alternate;
+  }
+
+  /* 名字：缓缓上下浮动 */
+  .info h1 { 
+    font-size: 32px; margin-bottom: 8px; letter-spacing: 2px; color: var(--text);
+    animation: floatName 2.5s ease-in-out infinite alternate;
+  }
+  .info p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
+  
+  .tags span {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 13px; margin-right: 8px; margin-bottom: 8px;
+    font-weight: 600;
+    transition: transform 0.2s;
+  }
+  .tags span:hover { transform: scale(1.1); background: var(--accent); color: white; }
+
+  /* ================= 右侧可爱动图区 ================= */
+  .cute-anim {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 10px;
+  }
+  
+  .float-item {
+    font-size: 28px;
+    display: inline-block;
+    animation: floatAndWiggle 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 6px rgba(236, 72, 153, 0.2)); 
+  }
+
+  /* ================= 简历内容卡片 ================= */
+  .section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.06); 
+    opacity: 0;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* 依次上浮出现延迟 */
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+  .section:nth-child(5) { animation-delay: 0.4s; }
+  .section:nth-child(6) { animation-delay: 0.5s; }
+
+  /* 鼠标悬停时卡片上浮放大 */
+  .section:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 12px 25px rgba(236, 72, 153, 0.15);
+  }
+
+  .section h2 { 
+    font-size: 18px; 
+    margin-bottom: 16px; 
+    color: var(--accent); 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+  }
+  
+  .exp-item { margin-bottom: 20px; }
+  .exp-item:last-child { margin-bottom: 0; }
+  .exp-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-weight: bold; font-size: 16px; margin-bottom: 8px; color: var(--text);
+  }
+  .exp-header span:last-child { font-size: 14px; color: var(--text-muted); font-weight: normal; }
+  .exp-content { font-size: 14.5px; color: var(--text-muted); line-height: 1.7; }
+  .exp-content p { margin-bottom: 4px; transition: transform 0.2s; }
+  .exp-content p:hover { transform: translateX(5px); color: var(--accent); }
+  
+  ul.resume-list { padding-left: 20px; color: var(--text-muted); font-size: 14.5px; line-height: 1.8; }
+  ul.resume-list li { transition: transform 0.2s; }
+  ul.resume-list li:hover { transform: translateX(5px); color: var(--accent); }
+  ul.resume-list li::marker { color: var(--accent); }
+
+  /* ================= 留言板 ================= */
+  .msg-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  
+  .msg-form input, .msg-form textarea {
+    width: 100%; padding: 12px;
+    background: #fdfafb; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px; color: var(--text); font-family: inherit;
+    outline: none; transition: 0.3s;
+  }
+  .msg-form input:focus, .msg-form textarea:focus { 
+    border-color: var(--accent); 
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1); 
+    transform: scale(1.01);
+  }
+  
+  .msg-form button {
+    align-self: flex-start;
+    background: var(--accent); color: white;
+    border: none; padding: 10px 24px; border-radius: 8px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+  }
+  .msg-form button:hover { 
+    background: #db2777; 
+    transform: translateY(-3px) scale(1.05); 
+    box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4);
+  }
+
+  .msg-list { display: flex; flex-direction: column; gap: 16px; }
+  .msg-item {
+    background: #fdfafb; padding: 16px; border-radius: 12px;
+    border-left: 4px solid var(--accent);
+    animation: slideInLeft 0.4s ease-out forwards;
+  }
+  .msg-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .msg-name { font-weight: bold; color: var(--text); }
+  .msg-time { font-size: 12px; color: var(--text-muted); }
+  .msg-content { color: var(--text-muted); font-size: 14.5px; }
+
+  /* ================= 关键帧动画库 ================= */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes breathe {
+    0% { box-shadow: 0 5px 15px rgba(236, 72, 153, 0.15); transform: scale(1); }
+    100% { box-shadow: 0 15px 30px rgba(236, 72, 153, 0.3); transform: scale(1.03); }
+  }
+
+  @keyframes floatName {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-5px); }
+  }
+
+  @keyframes floatAndWiggle {
+    0% { transform: translateY(0) rotate(-10deg); }
+    50% { transform: translateY(-15px) rotate(10deg); }
+    100% { transform: translateY(0) rotate(-10deg); }
+  }
+  
+  /* 手机端适配 */
+  @media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .cute-anim { padding-right: 0; margin-top: 10px; align-self: center; }
+    .info h1 { font-size: 26px; }
+    .bg-decorations { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 全屏背景漂浮装饰 -->
+<div class="bg-decorations">
+  <div class="decor">🎀</div>
+  <div class="decor">✨</div>
+  <div class="decor">🌸</div>
+  <div class="decor">🫧</div>
+  <div class="decor">💖</div>
+  <div class="decor">✨</div>
+  <div class="decor">🎀</div>
+  <div class="decor">🌸</div>
+</div>
+
+<div class="container">
+  
+  <!-- 顶部：头像、信息、可爱动图 -->
+  <div class="header">
+    <div class="profile-left">
+      <img src="avatar.jpg" class="avatar" alt="照片">
+      <div class="info">
+        <h1>卷卷卷</h1>
+        <p>求职地：重庆 | 电子商务本科</p>
+        <div class="tags">
+          <span>Excel</span>
+          <span>PPT</span>
+          <span>HTML/CSS</span>
+          <span>英语四级</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cute-anim">
+      <span class="float-item" style="animation-delay: 0s;">✨</span>
+      <span class="float-item" style="animation-delay: 0.5s; font-size: 40px;">🐱</span>
+      <span class="float-item" style="animation-delay: 1s;">🌸</span>
+    </div>
+  </div>
+
+  <!-- 教育背景 -->
+  <div class="section">
+    <h2>🎓 教育背景</h2>
+    <div class="exp-item">
+      <div class="exp-header">
+        <span>重庆财经学院 | 电子商务 (全日制本科)</span>
+        <span>2020.07 - 2024.07</span>
+      </div>
+      <div class="exp-content">
+        相关课程：客户关系管理、市场调查与分析、统计学、管理运筹学
+      </div>
+    </div>
+  </div>
+
+  <!-- 校园经历 & 工作经历 -->
+  <div class="section">
+    <h2>🏢 校园经历 & 工作经历</h2>
+    
+    <div class="exp-item">
+      <div class="exp-header">
+        <span>志愿团队 | 志愿者</span>
+        <span>2022.03 - 2023.09</span>
+      </div>
+      <div class="exp-content">
+        <p>• <b>返校协助：</b>负责督促学生遵守返校流程；负责协助完成入校检查；</p>
+        <p>• <b>物资统筹：</b>负责教学楼爱心雨伞的整理，及时记录借用情况，检查雨伞的完备齐全；</p>
+        <p>• <b>义工服务：</b>按时清扫校园校道，维护校内环境。</p>
+      </div>
+    </div>
+    
+    <div class="exp-item">
+      <div class="exp-header">
+        <span>个人兼职</span>
+        <span>2020.10 - 2024.03</span>
+      </div>
+      <div class="exp-content">
+        在校期间从事代拿快递，送外卖等兼职，吃苦耐劳，认真负责。
+      </div>
+    </div>
+
+    <!-- 跨境电商经历（增加了 margin-top 保证间距） -->
+    <div class="exp-item" style="margin-top: 35px;">
+      <div class="exp-header">
+        <span>跨境电商 | 工作经历</span>
+        <span>2024.04 至今</span>
+      </div>
+      <div class="exp-content">
+        <p>• <b>日常工作：</b>从事跨境电商相关工作。（这里你可以自己补充具体的工作内容，比如：负责选品、店铺运营、客户沟通等）</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 荣誉经历 -->
+  <div class="section">
+    <h2>🏆 荣誉经历</h2>
+    <ul class="resume-list">
+      <li>2020-2022 连续2年获得三等奖学金</li>
+      <li>2021.09 获第七届东方财富杯金融挑战赛二等奖</li>
+    </ul>
+  </div>
+
+  <!-- 综合素质 -->
+  <div class="section">
+    <h2>🌟 综合素质</h2>
+    <ul class="resume-list">
+      <li>具备良好的团队合作精神；</li>
+      <li>具有良好的职业道德，做事严谨、细致、认真；</li>
+      <li>适应性强，善于处理人际关系；</li>
+      <li>具有一定的抗压能力。</li>
+    </ul>
+  </div>
+
+  <!-- 留言板 -->
+  <div class="section">
+    <h2>💬 访客留言板</h2>
+    <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 14px;">欢迎在这里留下您的建议或联系方式！</p>
+    
+    <form class="msg-form" id="msgForm">
+      <input type="text" id="name" placeholder="您的名字 / 公司" required maxlength="20">
+      <textarea id="content" placeholder="留言内容..." required maxlength="200"></textarea>
+      <button type="submit">发送留言</button>
+    </form>
+
+    <div class="msg-list" id="msgList"></div>
+  </div>
+
+</div>
+
+<script>
+  // ================= 留言板交互逻辑 =================
+  async function loadMessages() {
+    try {
+      const res = await fetch('/api/messages');
+      const data = await res.json();
+      renderMessages(data);
+    } catch (err) { console.error('加载留言失败', err); }
+  }
+
+  function renderMessages(messages) {
+    const list = document.getElementById('msgList');
+    if (messages.length === 0) {
+      list.innerHTML = '<p style="color:#a1a1aa; font-size:14px; text-align:center;">还没有留言，快来抢沙发吧！</p>';
+      return;
+    }
+    list.innerHTML = messages.map(msg => {
+      const date = new Date(msg.created_at).toLocaleString('zh-CN', { hour12: false });
+      return `
+        <div class="msg-item">
+          <div class="msg-header">
+            <span class="msg-name">${msg.name}</span>
+            <span class="msg-time">${date}</span>
+          </div>
+          <div class="msg-content">${msg.content}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('msgForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const content = document.getElementById('content').value;
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, content })
+      });
+      if (res.ok) {
+        document.getElementById('content').value = '';
+        loadMessages();
+      }
+    } catch (err) { alert('发送失败，请检查后端服务'); }
+  });
+
+  // 初始化
+  loadMessages();
+</script>
+</body>
+</html>
